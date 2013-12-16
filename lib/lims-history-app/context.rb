@@ -66,9 +66,21 @@ module Lims::HistoryApp
     # @param [Hash] parameters
     # @return [Sequel::Dataset]
     def add_query_parameters(dataset, parameters)
+      dataset = add_sort_parameter(dataset, parameters.delete("sort"))
+
       filtered_parameters(dataset, parameters).inject(dataset) do |m,(k,v)| 
         m.where(k.to_sym => v)
       end
+    end
+
+    # @param [Sequel::Dataset] dataset
+    # @param [String] sort
+    # @return [Sequel::Dataset]
+    def add_sort_parameter(dataset, sort)
+      return dataset unless sort
+      sort_method = (sort[0] == "-") ? "reverse_order" : "order"
+      sort_by = (sort[0] == "-") ? sort[1..-1] : sort
+      dataset.send(sort_method, sort_by.to_sym)
     end
   end
 end

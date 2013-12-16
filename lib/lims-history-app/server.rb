@@ -11,14 +11,14 @@ end
 module Lims
   module HistoryApp
     class Server < Sinatra::Base
-
-      def filtered_query_parameters
-        request.params.mash do |k,v|
-          [k, Rack::Utils.escape_html(v)]
-        end
-      end
-      
+     
       helpers do
+        def filtered_query_parameters
+          request.params.mash do |k,v|
+            [k, Rack::Utils.escape_html(v)]
+          end
+        end
+
         def url_for(target)
           @resource_page.url_for(target)
         end

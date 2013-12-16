@@ -18,7 +18,7 @@ module Lims::HistoryApp
     def call
       offset = (page - 1) * @number_per_page
       @total = @dataset.count
-      @dataset.order(primary_key).limit(@number_per_page).offset(offset).all
+      @dataset.limit(@number_per_page).offset(offset).all
     end
 
     # @param [String,Symbol] target
