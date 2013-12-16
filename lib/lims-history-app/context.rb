@@ -66,11 +66,22 @@ module Lims::HistoryApp
     # @param [Hash] parameters
     # @return [Sequel::Dataset]
     def add_query_parameters(dataset, parameters)
-      dataset = add_sort_parameter(dataset, parameters.delete("sort"))
+      selected_dataset = add_fields_parameter(dataset, parameters.delete("fields"))
+      sorted_dataset = add_sort_parameter(selected_dataset, parameters.delete("sort"))
 
-      filtered_parameters(dataset, parameters).inject(dataset) do |m,(k,v)| 
+      filtered_parameters(sorted_dataset, parameters).inject(sorted_dataset) do |m,(k,v)| 
         m.where(k.to_sym => v)
       end
+    end
+
+    # @param [Sequel::Dataset] dataset
+    # @param [String] fields
+    # @return [Sequel::Dataset]
+    def add_fields_parameter(dataset, fields)
+      return dataset unless fields
+      fields_array = fields.split(",").map(&:to_sym)
+      fields_array << :uuid
+      dataset.select(*fields_array) 
     end
 
     # @param [Sequel::Dataset] dataset
