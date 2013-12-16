@@ -66,7 +66,8 @@ module Lims::HistoryApp
     # @param [Hash] parameters
     # @return [Sequel::Dataset]
     def add_query_parameters(dataset, parameters)
-      selected_dataset = add_fields_parameter(dataset, parameters.delete("fields"))
+      limited_dataset = add_limit_parameter(dataset, parameters.delete("limit"))
+      selected_dataset = add_fields_parameter(limited_dataset, parameters.delete("fields"))
       sorted_dataset = add_sort_parameter(selected_dataset, parameters.delete("sort"))
 
       filtered_parameters(sorted_dataset, parameters).inject(sorted_dataset) do |m,(k,v)| 
@@ -75,12 +76,21 @@ module Lims::HistoryApp
     end
 
     # @param [Sequel::Dataset] dataset
+    # @param [String] limit
+    # @return [Sequel::Dataset]
+    def add_limit_parameter(dataset, limit)
+      limit = limit ? limit.to_i : @number_of_result_per_page 
+      @number_of_result_per_page = limit
+      dataset.limit(limit)
+    end
+
+    # @param [Sequel::Dataset] dataset
     # @param [String] fields
     # @return [Sequel::Dataset]
     def add_fields_parameter(dataset, fields)
       return dataset unless fields
       fields_array = fields.split(",").map(&:to_sym)
-      fields_array << :uuid
+      fields_array << :uuid # uuid is mandatory as it's needed for the action block in the view
       dataset.select(*fields_array) 
     end
 
